@@ -1,0 +1,12 @@
+# Ignore libraries in both folders
+**/node_modules/
+
+# Ignore your database keys in the backend
+ecommerce-backend/.env
+
+# Ignore build folders in the frontend
+ecommerce-frontend-fixed/build/
+ecommerce-frontend-fixed/dist/
+
+# System files
+.DS_Store

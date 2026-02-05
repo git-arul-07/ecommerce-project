@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import API_BASE_URL from "../api";
 
 const AuthContext = createContext();
 
@@ -14,13 +15,26 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
- const login = (userData) => {
-  // Ensure we don't save 'undefined' to the state
-  if (userData) {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  }
-};
+  const login = async (email, password) => {
+    const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    // ✅ SAVE USER + TOKEN
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
+    localStorage.setItem("token", data.token);
+
+    return true;
+  };
 
   const logout = () => {
     setUser(null);

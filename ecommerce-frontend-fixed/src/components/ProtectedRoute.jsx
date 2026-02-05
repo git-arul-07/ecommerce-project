@@ -2,11 +2,12 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = () => {
-  const { user } = useAuth();
-  const token = localStorage.getItem("token");
+  const { user, loading } = useAuth();
 
-  // If there is no user and no token, send them to login
-  return (user || token) ? <Outlet /> : <Navigate to="/login" />;
+  // ⏳ CRITICAL: wait for auth check
+  if (loading) return null;
+
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

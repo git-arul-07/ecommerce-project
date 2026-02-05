@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,11 +11,11 @@ import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import ProductDetails from "./pages/ProductDetails";
-import UserOrders from "./pages/UserOrders"; 
-import AdminDashboard from "./pages/AdminDashboard"; 
+import UserOrders from "./pages/UserOrders";
+import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 
-function AppContent() {
+function App() {
   const location = useLocation();
   const isAdminMode = location.pathname.startsWith("/admin");
 
@@ -25,25 +25,24 @@ function AppContent() {
 
       <div style={{ minHeight: "80vh" }}>
         <Routes>
-          {/* PUBLIC ROUTES */}
+          {/* PUBLIC */}
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/cart" element={<Cart />} />
 
-          {/* USER PROTECTED ROUTES */}
+          {/* USER PROTECTED */}
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<UserOrders />} />
             <Route path="/checkout" element={<Checkout />} />
-          </Route> {/* <--- FIXED: You were missing this closing tag! */}
+          </Route>
 
-          {/* ADMIN PROTECTED ROUTES */}
+          {/* ADMIN PROTECTED */}
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
           </Route>
-          
         </Routes>
       </div>
 
@@ -52,10 +51,4 @@ function AppContent() {
   );
 }
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
-}
+export default App;

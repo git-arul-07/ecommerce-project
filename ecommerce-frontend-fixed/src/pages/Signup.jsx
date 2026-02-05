@@ -16,14 +16,17 @@ const Signup = () => {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed");
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
 
       alert("Signup successful! Please login.");
       navigate("/login");
@@ -84,6 +87,7 @@ const Signup = () => {
               background: "#ffd814",
               border: "none",
               fontWeight: "bold",
+              cursor: "pointer",
             }}
           >
             Sign Up

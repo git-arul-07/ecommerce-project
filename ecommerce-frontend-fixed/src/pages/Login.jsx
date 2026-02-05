@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
+import API_BASE_URL from "../api";
 
 const Login = () => {
   const { login } = useAuth();
@@ -11,67 +12,84 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      
+
       const data = await res.json();
-      
       if (!res.ok) throw new Error(data.message || "Login failed");
 
-      // 1. SAFE DATA CHECK: Ensure data and user exist before proceeding
-      if (data && data.user) {
-        localStorage.setItem("token", data.token);
+      // Save token
+      localStorage.setItem("token", data.token);
 
-        // 2. SAFE DATA PASSING: Fallback for name and admin status
-        login({ 
-          ...data.user,
-          name: data.user?.name || data.user?.email?.split('@')[0] || "User",
-          isAdmin: data.user?.isAdmin || false,
-          token: data.token
-        }); 
+      // Save user via context
+      login({
+        ...data.user,
+        token: data.token,
+      });
 
-        // 3. CONNECTIVITY: Redirect based on role
-        if (data.user?.isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+      // Redirect
+      if (data.user?.isAdmin) {
+        navigate("/admin");
       } else {
-        throw new Error("Invalid server response: No user data found.");
+        navigate("/");
       }
-      
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Network error");
     }
   };
 
   return (
-    <div className="container" style={{ maxWidth: '400px', marginTop: '4rem' }}>
-      <div className="card" style={{ padding: '30px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ textAlign: 'center' }}>Sign In</h2>
-        {error && <div style={{ color: 'red', background: '#fee2e2', padding: '10px', marginBottom: '10px', borderRadius: '4px' }}>{error}</div>}
+    <div className="container" style={{ maxWidth: "400px", marginTop: "4rem" }}>
+      <div style={{ padding: "30px", background: "white", borderRadius: "8px" }}>
+        <h2 style={{ textAlign: "center" }}>Sign In</h2>
+
+        {error && (
+          <div style={{ color: "red", marginBottom: "10px" }}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Email Address</label>
-            <input type="email" required style={{ width: '100%', padding: '10px' }}
-              onChange={(e) => setFormData({...formData, email: e.target.value})} />
-          </div>
-          <div style={{ marginBottom: '20px' }}>
-            <label>Password</label>
-            <input type="password" required style={{ width: '100%', padding: '10px' }}
-              onChange={(e) => setFormData({...formData, password: e.target.value})} />
-          </div>
-          <button style={{ width: '100%', padding: '12px', background: '#ffdb15', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-            Continue
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            style={{ width: "100%", padding: "10px", marginBottom: "20px" }}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+          />
+
+          <button
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "#ffd814",
+              border: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Sign In
           </button>
         </form>
-        <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
-          New to E-Shop? <Link to="/signup">Create your account</Link>
+
+        <p style={{ marginTop: "20px", textAlign: "center" }}>
+          New here? <Link to="/signup">Create account</Link>
         </p>
       </div>
     </div>

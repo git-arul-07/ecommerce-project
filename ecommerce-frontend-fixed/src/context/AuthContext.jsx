@@ -7,16 +7,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔁 Restore user on refresh
+  // 🔁 Restore user from localStorage ONCE
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (storedUser && token) {
+      setUser({ ...JSON.parse(storedUser), token });
     }
+
     setLoading(false);
   }, []);
 
-  // ✅ LOGIN (normalized user object)
+  // ✅ LOGIN
   const login = async (email, password) => {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
@@ -35,7 +38,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     setUser(normalizedUser);
-    localStorage.setItem("user", JSON.stringify(normalizedUser));
+    localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("token", data.token);
 
     return true;
@@ -44,7 +47,8 @@ export const AuthProvider = ({ children }) => {
   // ✅ LOGOUT
   const logout = () => {
     setUser(null);
-    localStorage.clear();
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   return (

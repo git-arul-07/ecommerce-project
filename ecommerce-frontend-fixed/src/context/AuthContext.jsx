@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔁 Restore user on refresh
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // ✅ LOGIN (normalized user object)
   const login = async (email, password) => {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
@@ -23,19 +25,23 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = await res.json();
-
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
 
-    // ✅ SAVE USER + TOKEN
-    setUser(data);
-    localStorage.setItem("user", JSON.stringify(data));
+    const normalizedUser = {
+      ...data.user,
+      token: data.token,
+    };
+
+    setUser(normalizedUser);
+    localStorage.setItem("user", JSON.stringify(normalizedUser));
     localStorage.setItem("token", data.token);
 
     return true;
   };
 
+  // ✅ LOGOUT
   const logout = () => {
     setUser(null);
     localStorage.clear();

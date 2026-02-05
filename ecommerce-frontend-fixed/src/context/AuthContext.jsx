@@ -7,19 +7,18 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔁 Restore user from localStorage ONCE
+  // Restore session on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
 
     if (storedUser && token) {
-      setUser({ ...JSON.parse(storedUser), token });
+      setUser(JSON.parse(storedUser));
     }
-
     setLoading(false);
   }, []);
 
-  // ✅ LOGIN
+  // LOGIN (ONLY credentials go to backend)
   const login = async (email, password) => {
     const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: "POST",
@@ -28,27 +27,18 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.message || "Login failed");
-    }
+    if (!res.ok) throw new Error(data.message || "Login failed");
 
-    const normalizedUser = {
-      ...data.user,
-      token: data.token,
-    };
-
-    setUser(normalizedUser);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    // Save exactly what backend sends
     localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-    return true;
+    setUser(data.user);
   };
 
-  // ✅ LOGOUT
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.clear();
   };
 
   return (

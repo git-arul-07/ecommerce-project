@@ -24,16 +24,14 @@ const AdminDashboard = () => {
         },
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch admin orders");
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(
+          data.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          )
+        );
       }
-
-      const data = await res.json();
-      setOrders(
-        data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        )
-      );
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -56,11 +54,9 @@ const AdminDashboard = () => {
         }
       );
 
-      if (!res.ok) {
-        throw new Error("Status update failed");
+      if (res.ok) {
+        fetchOrders();
       }
-
-      fetchOrders();
     } catch (error) {
       console.error("Update failed:", error);
     }
@@ -79,13 +75,14 @@ const AdminDashboard = () => {
           height: "100%",
         }}
       >
-        <h2 style={{ color: "#38bdf8", marginBottom: "30px" }}>
+        <h2 style={{ color: "#38bdf8", marginBottom: "30px", fontSize: "1.5rem" }}>
           ADMIN PORTAL
         </h2>
 
         <button
           onClick={fetchOrders}
           style={{
+            textAlign: "left",
             background: "#334155",
             color: "white",
             padding: "12px",
@@ -99,7 +96,7 @@ const AdminDashboard = () => {
           🔄 Refresh Orders
         </button>
 
-        <div style={{ position: "absolute", bottom: "30px", width: "200px" }}>
+        <div style={{ marginTop: "auto", position: "absolute", bottom: "30px" }}>
           <button
             onClick={() => navigate("/")}
             style={{
@@ -134,7 +131,7 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* MAIN */}
+      {/* MAIN CONTENT */}
       <main
         style={{
           marginLeft: "260px",
@@ -142,25 +139,46 @@ const AdminDashboard = () => {
           width: "calc(100% - 260px)",
         }}
       >
-        <h1>Order Management</h1>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "30px",
+          }}
+        >
+          <h1>Order Management</h1>
+          <div>
+            <div style={{ fontSize: "0.8rem", color: "#64748b" }}>
+              Administrator
+            </div>
+            <strong>{user?.email}</strong>
+          </div>
+        </div>
 
-        <div style={{ background: "white", borderRadius: "12px" }}>
+        <div
+          style={{
+            background: "white",
+            borderRadius: "12px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          }}
+        >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Date</th>
-                <th>User</th>
+                <th>Customer</th>
                 <th>Total</th>
                 <th>Status</th>
-                <th>Update</th>
+                <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan="6" style={{ textAlign: "center", padding: "40px" }}>
-                    No orders found
+                    No orders found.
                   </td>
                 </tr>
               ) : (
@@ -168,17 +186,17 @@ const AdminDashboard = () => {
                   <tr key={order._id}>
                     <td>#{order._id.slice(-6)}</td>
                     <td>
-                      {new Date(order.createdAt).toLocaleString()}
+                      {new Date(order.createdAt).toLocaleString("en-IN")}
                     </td>
                     <td>{order.userEmail}</td>
                     <td>₹{order.total}</td>
                     <td>{order.status || "Pending"}</td>
                     <td>
                       <select
+                        defaultValue=""
                         onChange={(e) =>
                           handleStatusUpdate(order._id, e.target.value)
                         }
-                        defaultValue=""
                       >
                         <option value="" disabled>
                           Update
